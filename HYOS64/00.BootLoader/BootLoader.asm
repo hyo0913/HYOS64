@@ -4,9 +4,9 @@
 SECTION .text	; text 섹션(섹그먼트)을 정의
 
 jmp 0x07C0:START
-
-; HYOS64 OS에 관련된 환경 설정 값
-TOTALSECTORCOUNT: dw 1024
+TOTALSECTORCOUNT: dw 0x02 		; 부트 로더를 제외한 HYOS64 OS 이미지의 크기
+									; 최대 1152 섹터(0x9000byte)까지 가능
+KERNEL32SECTORCOUNT: dw 0x02 	; 보호 모드 커널의 총 섹터 수
 
 START:
 	mov ax, 0x07C0
@@ -19,6 +19,7 @@ START:
 	mov sp, 0xFFFE
 	mov bp, 0xFFFE
 
+	; 화면을 모두 지우고, 속성값을 녹색으로 설정
 	mov si, 0
 
 .SCREENCLEARLOOP:
@@ -47,6 +48,7 @@ START:
 	; 디스크에서 OS 이미지를 로딩
 	; 디스크를 읽기 전에 먼저 리셋
 
+; 디스크를 리셋하는 코드의 시작
 RESETDISK:
 	; BIOS Reset Function 호출
 	; 서비스 번호 0, 드라이브 번호 (0=Floppy)
@@ -61,10 +63,13 @@ RESETDISK:
 	mov es, si
 	mov bx, 0x0000
 
+	mov di, word [TOTALSECTORCOUNT]
+
+; 디스크를 읽는 코드의 시작
 READDATA:
 	cmp di, 0
 	je READEND
-	sub di, 1
+	sub di, 0x01
 
 	; BIOS Read Function 호출
 	mov ah, 0x02
@@ -78,13 +83,12 @@ READDATA:
 
 	; 복사할 어드레스와 트랙, 헤드, 섹터 어드레스 계산
 	add si, 0x0020
-
 	mov es, si
 
 	mov al, byte [SECTORNUMBER]
 	add al, 0x01
 	mov byte [SECTORNUMBER], al
-	cmp al, 19
+	cmp al, 37 ; cmp al, 19
 	jl READDATA
 
 	xor byte [HEADNUMBER], 0x01
@@ -118,7 +122,10 @@ HANDLEDISKERROR:
 	push 20
 	call PRINTMESSAGE
 
+	jmp $
+
 ; 메시지를 출력하는 함수
+; parameters: x 좌표, y좌표, 문자열
 PRINTMESSAGE:
 	push bp
 	mov bp, sp
@@ -131,7 +138,6 @@ PRINTMESSAGE:
 	push dx
 
 	mov ax, 0xB800
-
 	mov es, ax
 
 	; X, Y의 좌표로 비디오 메모리의 어드레스를 계산함
@@ -148,7 +154,7 @@ PRINTMESSAGE:
 	mov si, word [bp+8]
 
 .MESSAGELOOP:
-	mov cl, byte [si + MESSAGE1]
+	mov cl, byte [si]
 	cmp cl, 0
 	je .MESSAGEEND
 
@@ -185,12 +191,12 @@ HEADNUMBER:db 0x00
 TRACKNUMBER: db 0x00
 
 times 510 - ($ - $$)	db	0x00	; $: 현재 라인의 어드레스
-										; $$: 현재 섹션(.text)의 시작 어드레스
-										; $ - $$: 현재 섹션을 기준으로 하는 오프셋
-										; 510 - ($ - $$): 현재부터 어드레스 510까지
-										; db 0x00: 1바이트를 선언하고 값은 0x00
-										; times: 반복 수행
-										; 현재 위치에서 어드레스 510까지 0x00으로 채움
+									; $$: 현재 섹션(.text)의 시작 어드레스
+									; $ - $$: 현재 섹션을 기준으로 하는 오프셋
+									; 510 - ($ - $$): 현재부터 어드레스 510까지
+									; db 0x00: 1바이트를 선언하고 값은 0x00
+									; times: 반복 수행
+									; 현재 위치에서 어드레스 510까지 0x00으로 채움
 
 db 0x55	; 1바이트를 선언하고 값은 0x55
 db 0xAA	; 1바이트를 선언하고 값은 0xAA

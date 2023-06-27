@@ -6,6 +6,7 @@
 *.ko
 *.obj
 *.elf
+*.dep
 
 # Linker output
 *.ilk
@@ -52,5 +53,8 @@ Mkfile.old
 dkms.conf
 
 .settings/
+Object/
 
 *.cproject
+*.bin
+*.img
