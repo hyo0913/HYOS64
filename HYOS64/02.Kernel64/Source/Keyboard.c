@@ -538,30 +538,23 @@ BOOL kConvertScanCodeToASCIICode(BYTE bScanCode, BYTE* pbASCIICode, BOOL* pbFlag
     bUseCombinedKey = kIsUseCombinedCode(bScanCode);
 
     // 키 값 설정
-    if (bUseCombinedKey == TRUE)
-    {
+    if (bUseCombinedKey == TRUE) {
         *pbASCIICode = gs_vstKeyMappingTable[ bScanCode & 0x7F ].bCombinedCode;
-    }
-    else
-    {
+    } else {
         *pbASCIICode = gs_vstKeyMappingTable[ bScanCode & 0x7F ].bNormalCode;
     }
 
     // 확장 키 유무 설정
-    if (gs_stKeyboardManager.bExtendedCodeIn == TRUE)
-    {
-        *pbFlags = KEY_FLAGS_EXTENDEDKEY;
+    if (gs_stKeyboardManager.bExtendedCodeIn == TRUE) {
+    	*pbFlags = KEY_FLAGS_EXTENDEDKEY;
         gs_stKeyboardManager.bExtendedCodeIn = FALSE;
-    }
-    else
-    {
-        *pbFlags = 0;
+    } else {
+    	*pbFlags = 0;
     }
 
     // 눌러짐 또는 떨어짐 유무 설정
-    if ((bScanCode & 0x80) == 0)
-    {
-        *pbFlags |= KEY_FLAGS_DOWN;
+    if ((bScanCode & 0x80) == 0) {
+    	*pbFlags |= KEY_FLAGS_DOWN;
     }
 
     // 조합 키 눌림 또는 떨어짐 상태를 갱신
