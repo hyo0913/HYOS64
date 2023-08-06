@@ -65,6 +65,9 @@
 #define KEY_F12         0x9F
 #define KEY_PAUSE       0xA0
 
+// 키 큐에 대한 매크로
+#define KEY_MAXQUEUECOUNT	100		// 키 큐의 최대 크기
+
 #pragma pack(push, 1)
 
 // 스캔 코드 테이블을 구성하는 항목
@@ -77,8 +80,7 @@ typedef struct kKeyMappingEntryStruct {
 } KEYMAPPINGENTRY;
 
 // 키보드의 상태를 관리하는 자료구조
-typedef struct kKeyboardManagerStruct
-{
+typedef struct kKeyboardManagerStruct {
     // 조합 키 정보
     BOOL bShiftDown;
     BOOL bCapsLockOn;
@@ -89,6 +91,13 @@ typedef struct kKeyboardManagerStruct
     BOOL bExtendedCodeIn;
     int iSkipCountForPause;
 } KEYBOARDMANAGER;
+
+// 키 큐에 삽입할 데이터 구조체
+typedef struct kKeyStruct {
+	BYTE bScanCode; // 키보드에서 전달된 스캔 코드
+	BYTE bASCIICode; // 스캔 코드를 변환한 ASCII 코드
+	BYTE bFlags; // 키 상태를 저장하는 플래그 (눌림/떨어짐/확장 키 여부)
+} KEYDATA;
 
 #pragma pack(pop)
 
@@ -105,5 +114,9 @@ BOOL kIsNumberPadScanCode(BYTE bScanCode);
 BOOL kIsUseCombinedCode(BOOL bScanCode);
 void UpdateCombinationKeyStatusAndLED(BYTE bScanCode);
 BOOL kConvertScanCodeToASCIICode(BYTE bScanCode, BYTE* pbASCIICode, BOOL* pbFlags);
+BOOL kInitializeKeyboard(void);
+BOOL kConvertScanCodeAndPutQueue(BYTE bScanCode);
+BOOL kGetKeyFromKeyQueue(KEYDATA* pstData);
+BOOL kWaitForACKAndPutOtherScanCode(void);
 
 #endif /* __KEYBOARD_H__ */
