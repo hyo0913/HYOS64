@@ -67,5 +67,6 @@ void kWaitUsingPIT(const char* pcParameterBuffer);
 void kReadTimeStampCounter(const char* pcParameterBuffer);
 void kMeasureProcessorSpeed(const char* pcParameterBuffer);
 void kShowDateAndTime(const char* pcParameterBuffer);
+void kCreateTestTask(const char* pcParameterBuffer);
 
 #endif /* __KERNEL64_SOURCE_CONSOLESHELL_H__ */
