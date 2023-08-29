@@ -9,6 +9,9 @@
 #include "AssemblyUtility.h"
 #include <stdarg.h>
 
+// PIT 컨트롤러가 발생한 횟수를 저장할 카운터
+volatile QWORD g_qwTickCount = 0;
+
 void kMemSet(void* pvDestination, BYTE bData, int iSize)
 {
 	int i;
