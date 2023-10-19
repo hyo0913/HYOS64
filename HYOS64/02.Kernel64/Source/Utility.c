@@ -418,3 +418,11 @@ int kVSPrintf(char* pcBuffer, const char* pcFormatString, va_list ap)
 
     return iBufferIndex;
 }
+
+/**
+ * Tick Count를 반환
+ */
+QWORD kGetTickCount(void)
+{
+	 return g_qwTickCount;
+}

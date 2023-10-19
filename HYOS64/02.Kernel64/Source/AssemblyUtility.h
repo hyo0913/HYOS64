@@ -21,5 +21,7 @@ void kDisableInterrupt(void);
 QWORD kReadRFLAGS(void);
 QWORD kReadTSC(void);
 void kSwitchContext(CONTEXT* pstCurrentContext, CONTEXT* pstNextContext);
+void kHlt(void);
+BOOL kTestAndSet(volatile BYTE* pbDestination, BYTE bCompare, BYTE bSource);
 
 #endif /* __ASSENBLYUTILITY_H__ */
