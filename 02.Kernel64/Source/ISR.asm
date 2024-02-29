@@ -14,14 +14,14 @@ global kISRCoprocessorSegmentOverrun, kISRInvalidTSS, kISRSegmentNotPresent
 global kISRStackSegmentFault, kISRGeneralProtection, kISRPageFault, kISR15
 global kISRFPUError, kISRAlignmentCheck, kISRMachineCheck, kISRSIMDError, kISRETCException
 
-; 인터럽트(Interrupt) 처리를 위한 ISR
+; 인터럽트(Interrupt) 처리를 위한 ISR2
 global kISRTimer, kISRKeyboard, kISRSlavePIC, kISRSerial2, kISRSerial1, kISRParallel2
 global kISRFloppy, kISRParallel1, kISRRTC, kISRReserved, kISRNotUsed1, kISRNotUsed2
 global kISRMouse, kISRCoprocessor, kISRHDD1, kISRHDD2, kISRETCInterrupt
 
 ; 콘텍스트를 저장하고 셀렉터를 교체하는 매크로
 %macro KSAVECONTEXT 0       ; 파라미터를 전달받지 않는 KSAVECONTEXT 매크로 정의
-    ; RBP 레지스터부터 GS 세그먼트 셀렉터까지 모두 스택에 삽입
+    ; RBP 레지스터부터 GS 세그먼트 22셀렉터까지 모두 스택에 삽입
     push rbp
     mov rbp, rsp
     push rax

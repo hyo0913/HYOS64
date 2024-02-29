@@ -85,8 +85,7 @@ BOOL kWaitForACKAndPutOtherScanCode(void)
  */
 BOOL kActivateKeyboard(void)
 {
-    int i;
-    int j;
+    int i, j;
     BOOL bPreviousInterrupt;
     BOOL bResult;
 

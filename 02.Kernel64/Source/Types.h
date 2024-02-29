@@ -11,6 +11,9 @@
 #define FALSE 0
 #define NULL 0
 
+// stddef.h 헤더에 포함된 offsetof() 매크로의 내용
+#define offsetof(TYPE, MEMBER) __builtin_offsetof (TYPE, MEMBER)
+
 #pragma pack (push, 1)
 
 typedef struct kCharacterStruct {

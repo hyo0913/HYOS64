@@ -191,7 +191,7 @@ long kDecimalStringToLong(const char* pcBuffer)
     }
 
     // 문자열을 돌면서 차례로 변환
-    for( ; pcBuffer[i] != '\0'; i++) {
+    for(; pcBuffer[i] != '\0'; i++) {
         lValue *= 10;
         lValue += pcBuffer[i] - '0';
     }
@@ -425,4 +425,15 @@ int kVSPrintf(char* pcBuffer, const char* pcFormatString, va_list ap)
 QWORD kGetTickCount(void)
 {
 	 return g_qwTickCount;
+}
+
+void kSleep(QWORD qwMillisecond)
+{
+    QWORD qwLastTickCount;
+    
+    qwLastTickCount = g_qwTickCount;
+    
+    while ((g_qwTickCount - qwLastTickCount) <= qwMillisecond) {
+        kSchedule();
+    }
 }
