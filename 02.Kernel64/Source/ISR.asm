@@ -4,7 +4,7 @@ SECTION .text       ; text 섹션(세그먼트)을 정의
 
 ; 외부에서 정의된 함수를 쓸 수 있도록 선언함(Import)
 extern kCommonExceptionHandler, kCommonInterruptHandler, kKeyboardHandler
-extern kTimerHandler
+extern kTimerHandler, kDeviceNotAvailableHandler
 
 ; C 언어에서 호출할 수 있도록 이름을 노출함(Export)
 ; 예외(Exception) 처리를 위한 ISR
@@ -20,7 +20,7 @@ global kISRFloppy, kISRParallel1, kISRRTC, kISRReserved, kISRNotUsed1, kISRNotUs
 global kISRMouse, kISRCoprocessor, kISRHDD1, kISRHDD2, kISRETCInterrupt
 
 ; 콘텍스트를 저장하고 셀렉터를 교체하는 매크로
-%macro KSAVECONTEXT 0       ; 파라미터를 전달받지 않는 KSAVECONTEXT 매크로 정의
+%macro KSAVECONTEXT 0   ; 파라미터를 전달받지 않는 KSAVECONTEXT 매크로 정의
     ; RBP 레지스터부터 GS 세그먼트 22셀렉터까지 모두 스택에 삽입
     push rbp
     mov rbp, rsp
@@ -170,7 +170,7 @@ kISRDeviceNotAvailable:
 
     ; 핸들러에 예외 번호를 삽입하고 핸들러 호출
     mov rdi, 7
-    call kCommonExceptionHandler
+    call kDeviceNotAvailableHandler
 
     KLOADCONTEXT    ; 콘텍스트를 복원
     iretq           ; 인터럽트 처리를 완료하고 이전에 수행하던 코드로 복원

@@ -76,5 +76,6 @@ static void kTestMutex(const char* pcParameterBuffer);
 static void kCreateThreadTask(void);
 static void kTestThread(const char* pcParameterBuffer);
 static void kShowMatrix(const char* pcParameterBuffer);
+static void kTestPIE(const char* pcParameterBuffer);
 
 #endif /* __KERNEL64_SOURCE_CONSOLESHELL_H__ */
