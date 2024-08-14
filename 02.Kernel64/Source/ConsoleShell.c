@@ -14,6 +14,7 @@
 #include "AssemblyUtility.h"
 #include "Task.h"
 #include "Synchronization.h"
+#include "DynamicMemory.h"
 
 // 커맨드 테이블 정의
 SHELLCOMMANDENTRY gs_vstCommandTable[] = {
@@ -36,6 +37,12 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] = {
         { "testthread", "Test Thread And Process Function", kTestThread },
         { "showmatrix", "Show Matrix Screen", kShowMatrix },
         { "testpie", "Test PIE Calculation", kTestPIE },
+        { "testthread", "Test Thread And Process Function", kTestThread },
+        { "showmatrix", "Show Matrix Screen", kShowMatrix },
+        { "testpie", "Test PIE Calculation", kTestPIE },
+        { "dynamicmeminfo", "Show Dyanmic Memory Information", kShowDyanmicMemoryInformation },
+        { "testseqalloc", "Test Sequential Allocation & Free", kTestSequentialAllocation },
+        { "testranalloc", "Test Random Allocation & Free", kTestRandomAllocation },
 };
 
 //==============================================================================
@@ -203,11 +210,24 @@ static void kHelp(const char* pcCommandBuffer)
     }
 
     // 도움말 출력
-    for (i = 0; i < iCount; i++) {
-    	kPrintf("%s", gs_vstCommandTable[i].pcCommand);
-       kGetCursor(&iCursorX, &iCursorY);
-       kSetCursor(iMaxCommandLength, iCursorY);
-       kPrintf("  - %s\n", gs_vstCommandTable[i].pcHelp);
+    for (i = 0 ; i < iCount ; i++)
+    {
+        kPrintf("%s", gs_vstCommandTable[i].pcCommand);
+        kGetCursor(&iCursorX, &iCursorY);
+        kSetCursor(iMaxCommandLength, iCursorY);
+        kPrintf("  - %s\n", gs_vstCommandTable[i].pcHelp);
+
+        // 목록이 많을 경우 나눠서 보여줌
+        if ((i != 0) && ((i % 20) == 0))
+        {
+            kPrintf("Press any key to continue... ('q' is exit) : ");
+            if (kGetCh() == 'q')
+            {
+                kPrintf("\n");
+                break;
+            }
+            kPrintf("\n");
+        }
     }
 }
 
@@ -690,7 +710,7 @@ static void kPrintNumberTask(void)
     }
 
 	// 루프를 돌면서 숫자를 출력
-	for(i = 0 ; i < 5 ; i++) {
+	for (i = 0 ; i < 5 ; i++) {
 		kLock(&(gs_stMutex));
 		kPrintf("Task ID [0x%Q] Value[%d]\n", kGetRunningTask()->stLink.qwID, gs_qwAdder);
 
@@ -724,7 +744,7 @@ static void kTestMutex(const char* pcParameterBuffer)
     // 뮤텍스 초기화
     kInitializeMutex(&gs_stMutex);
 
-	for(i = 0 ; i < 3 ; i++) {
+	for (i = 0 ; i < 3 ; i++) {
 		// 뮤텍스를 테스트하는 태스크를 3개 생성
 		kCreateTask(TASK_FLAGS_LOW | TASK_FLAGS_THREAD, 0, 0, (QWORD)kPrintNumberTask);
 	}
@@ -740,7 +760,7 @@ static void kCreateThreadTask(void)
 {
     int i;
     
-    for(i = 0 ; i < 3 ; i++)
+    for (i = 0 ; i < 3 ; i++)
     {
         kCreateTask(TASK_FLAGS_LOW | TASK_FLAGS_THREAD, 0, 0, (QWORD) kTestTask2);
     }
@@ -820,7 +840,7 @@ static void kMatrixProcess(void)
 {
     int i;
     
-    for(i = 0 ; i < 300 ; i++)
+    for (i = 0 ; i < 300 ; i++)
     {
         if (kCreateTask(TASK_FLAGS_THREAD | TASK_FLAGS_LOW, 0, 0, 
                          (QWORD) kDropCharactorThread) == NULL)
@@ -891,7 +911,7 @@ static void kFPUTestTask(void)
         dValue2 = 1;
         
         // 테스트를 위해 동일한 계산을 2번 반복해서 실행
-        for(i = 0 ; i < 10 ; i++)
+        for (i = 0 ; i < 10 ; i++)
         {
             qwRandomValue = kRandom();
             dValue1 *= (double) qwRandomValue;
@@ -934,8 +954,168 @@ static void kTestPIE(const char* pcParameterBuffer)
              ((QWORD) (dResult * 100) % 10));
     
     // 실수를 계산하는 태스크를 생성
-    for(i = 0 ; i < 100 ; i++)
+    for (i = 0 ; i < 100 ; i++)
     {
         kCreateTask(TASK_FLAGS_LOW | TASK_FLAGS_THREAD, 0, 0, (QWORD) kFPUTestTask);
+    }
+}
+
+/**
+ *  동적 메모리 정보를 표시
+ */
+static void kShowDyanmicMemoryInformation(const char* pcParameterBuffer)
+{
+    QWORD qwStartAddress, qwTotalSize, qwMetaSize, qwUsedSize;
+    
+    kGetDynamicMemoryInformation(&qwStartAddress, &qwTotalSize, &qwMetaSize, 
+            &qwUsedSize);
+
+    kPrintf("============ Dynamic Memory Information ============\n");
+    kPrintf("Start Address: [0x%Q]\n", qwStartAddress);
+    kPrintf("Total Size:    [0x%Q]byte, [%d]MB\n", qwTotalSize, 
+            qwTotalSize / 1024 / 1024);
+    kPrintf("Meta Size:     [0x%Q]byte, [%d]KB\n", qwMetaSize, 
+            qwMetaSize / 1024);
+    kPrintf("Used Size:     [0x%Q]byte, [%d]KB\n", qwUsedSize, qwUsedSize / 1024);
+}
+
+/**
+ *  모든 블록 리스트의 블록을 순차적으로 할당하고 해제하는 테스트
+ */
+static void kTestSequentialAllocation(const char* pcParameterBuffer)
+{
+    DYNAMICMEMORY* pstMemory;
+    long i, j, k;
+    QWORD* pqwBuffer;
+    
+    kPrintf("============ Dynamic Memory Test ============\n");
+    pstMemory = kGetDynamicMemoryManager();
+    
+    for (i = 0 ; i < pstMemory->iMaxLevelCount ; i++)
+    {
+        kPrintf("Block List [ %d ] Test Start\n", i);
+        kPrintf("Allocation And Compare: ");
+        
+        // 모든 블록을 할당 받아서 값을 채운 후 검사
+        for (j = 0 ; j < (pstMemory->iBlockCountOfSmallestBlock >> i) ; j++)
+        {
+            pqwBuffer = kAllocateMemory(DYNAMICMEMORY_MIN_SIZE << i);
+            if (pqwBuffer == NULL)
+            {
+                kPrintf("\nAllocation Fail\n");
+                return ;
+            }
+
+            // 값을 채운 후 다시 검사
+            for (k = 0 ; k < (DYNAMICMEMORY_MIN_SIZE << i) / 8 ; k++)
+            {
+                pqwBuffer[k] = k;
+            }
+            
+            for (k = 0 ; k < (DYNAMICMEMORY_MIN_SIZE << i) / 8 ; k++)
+            {
+                if (pqwBuffer[k] != k)
+                {
+                    kPrintf("\nCompare Fail\n");
+                    return ;
+                }
+            }
+            // 진행 과정을 . 으로 표시
+            kPrintf(".");
+        }
+        
+        kPrintf("\nFree: ");
+        // 할당 받은 블록을 모두 반환
+        for (j = 0 ; j < (pstMemory->iBlockCountOfSmallestBlock >> i) ; j++)
+        {
+            if (kFreeMemory((void *) (pstMemory->qwStartAddress + 
+                         (DYNAMICMEMORY_MIN_SIZE << i) * j)) == FALSE)
+            {
+                kPrintf("\nFree Fail\n");
+                return ;
+            }
+            // 진행 과정을 . 으로 표시
+            kPrintf(".");
+        }
+        kPrintf("\n");
+    }
+    kPrintf("Test Complete~!!!\n");
+}
+
+/**
+ *  임의로 메모리를 할당하고 해제하는 것을 반복하는 태스크
+ */
+static void kRandomAllocationTask(void)
+{
+    TCB* pstTask;
+    QWORD qwMemorySize;
+    char vcBuffer[200];
+    BYTE* pbAllocationBuffer;
+    int i, j;
+    int iY;
+    
+    pstTask = kGetRunningTask();
+    iY = (pstTask->stLink.qwID) % 15 + 9;
+
+    for (j = 0 ; j < 10 ; j++)
+    {
+        // 1KB ~ 32M까지 할당하도록 함
+        do
+        {
+            qwMemorySize = ((kRandom() % (32 * 1024)) + 1) * 1024;
+            pbAllocationBuffer = kAllocateMemory(qwMemorySize);
+
+            // 만일 버퍼를 할당 받지 못하면 다른 태스크가 메모리를 사용하고 
+            // 있을 수 있으므로 잠시 대기한 후 다시 시도
+            if (pbAllocationBuffer == 0)
+            {
+                kSleep(1);
+            }
+        } while(pbAllocationBuffer == 0);
+            
+        kSPrintf(vcBuffer, "|Address: [0x%Q] Size: [0x%Q] Allocation Success", 
+                  pbAllocationBuffer, qwMemorySize);
+        // 자신의 ID를 Y 좌표로 하여 데이터를 출력
+        kPrintStringXY(20, iY, vcBuffer);
+        kSleep(200);
+        
+        // 버퍼를 반으로 나눠서 랜덤한 데이터를 똑같이 채움 
+        kSPrintf(vcBuffer, "|Address: [0x%Q] Size: [0x%Q] Data Write...     ", pbAllocationBuffer, qwMemorySize);
+        kPrintStringXY(20, iY, vcBuffer);
+        for (i = 0 ; i < qwMemorySize / 2 ; i++)
+        {
+            pbAllocationBuffer[i] = kRandom() & 0xFF;
+            pbAllocationBuffer[i + (qwMemorySize / 2)] = pbAllocationBuffer[i];
+        }
+        kSleep(200);
+        
+        // 채운 데이터가 정상적인지 다시 확인
+        kSPrintf(vcBuffer, "|Address: [0x%Q] Size: [0x%Q] Data Verify...   ", pbAllocationBuffer, qwMemorySize);
+        kPrintStringXY(20, iY, vcBuffer);
+        for (i = 0 ; i < qwMemorySize / 2 ; i++)
+        {
+            if (pbAllocationBuffer[i] != pbAllocationBuffer[i + (qwMemorySize / 2)])
+            {
+                kPrintf("Task ID[0x%Q] Verify Fail\n", pstTask->stLink.qwID);
+                kExitTask();
+            }
+        }
+        kFreeMemory(pbAllocationBuffer);
+        kSleep(200);
+    }
+    
+    kExitTask();
+}
+
+/**
+ *  태스크를 여러 개 생성하여 임의의 메모리를 할당하고 해제하는 것을 반복하는 테스트
+ */
+static void kTestRandomAllocation(const char* pcParameterBuffer)
+{
+    int i;
+    
+    for (i = 0 ; i < 1000 ; i++)
+    {
+        kCreateTask(TASK_FLAGS_LOWEST | TASK_FLAGS_THREAD, 0, 0, (QWORD) kRandomAllocationTask);
     }
 }

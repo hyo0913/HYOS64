@@ -77,5 +77,9 @@ static void kCreateThreadTask(void);
 static void kTestThread(const char* pcParameterBuffer);
 static void kShowMatrix(const char* pcParameterBuffer);
 static void kTestPIE(const char* pcParameterBuffer);
+static void kShowDyanmicMemoryInformation( const char* pcParameterBuffer );
+static void kTestSequentialAllocation( const char* pcParameterBuffer );
+static void kTestRandomAllocation( const char* pcParameterBuffer );
+static void kRandomAllocationTask( void );
 
 #endif /* __KERNEL64_SOURCE_CONSOLESHELL_H__ */
