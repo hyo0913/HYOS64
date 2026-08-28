@@ -11,9 +11,21 @@
                 "-L", "/home/shlee/HYOS64",
                 "-m", "64",
                 "-fda", "/home/shlee/HYOS64/Disk.img",
+                "-hda", "/home/shlee/HYOS64/HDD.img",
+                "-boot", "a",
                 "-rtc", "base=localtime",
                 "-M", "pc"
             ]
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "make"
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean"
         }
     ]
 }

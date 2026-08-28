@@ -19,7 +19,7 @@ void Main(void)
 	kPrintString(0, 4, "Minimum Memory Size Check...................[    ]");
 	if (kIsMemoryEnough() == FALSE) {
 		kPrintString(45, 4, "Fail");
-		kPrintString(0, 5, "Not Enough Memory~!! MINT64 OS Requires Over 64MB Memory~!!");
+		kPrintString(0, 5, "Not Enough Memory~!! HYOS64 OS Requires Over 64MB Memory~!!");
 		while(1);
 	} else {
 		kPrintString(45, 4, "Pass");
@@ -77,7 +77,7 @@ void kPrintString(int iX, int iY, const char *pcString)
 
 	pstScreen += (iY * 80) + iX;
 	for (i = 0; pcString[i] != 0; i++) {
-		pstScreen[i].bCharacter = pcString[i];
+		pstScreen[i].bCharactor = pcString[i];
 	}
 }
 

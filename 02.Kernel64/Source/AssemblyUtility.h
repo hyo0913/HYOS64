@@ -1,32 +1,40 @@
-/*
- * AssenblyUtil                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ity.h
- *
- *  Created on: 2023. 6. 29.
- *      Author: root
+/**
+ *  file    Utility.h
+ *  date    2009/01/07
+ *  author  kkamagui 
+ *          Copyright(c)2008 All rights reserved by kkamagui
+ *  brief   어셈블리어 유틸리티 함수들을 정의한 헤더 파일
  */
 
-#ifndef __ASSENBLYUTILITY_H__
-#define __ASSENBLYUTILITY_H__
+#ifndef __ASSEMBLYUTILITY_H__
+#define __ASSEMBLYUTILITY_H__
 
 #include "Types.h"
 #include "Task.h"
 
-BYTE kInPortByte(WORD wPort);
-void kOutPortByte(WORD wPort, BYTE bData);
-void kLoadGDTR(QWORD qwGDTRAddress);
-void kLoadTR(WORD wTSSSegmentOffset);
-void kLoadIDTR(QWORD qwIDTRAddress);
-void kEnableInterrupt(void);
-void kDisableInterrupt(void);
-QWORD kReadRFLAGS(void);
-QWORD kReadTSC(void);
-void kSwitchContext(CONTEXT* pstCurrentContext, CONTEXT* pstNextContext);
-void kHlt(void);
-BOOL kTestAndSet(volatile BYTE* pbDestination, BYTE bCompare, BYTE bSource);
-void kInitializeFPU(void);
-void kSaveFPUContext(void* pvFPUContext);
-void kLoadFPUContext(void* pvFPUContext);
-void kSetTS(void);
-void kClearTS(void);
+////////////////////////////////////////////////////////////////////////////////
+//
+//  함수
+//
+////////////////////////////////////////////////////////////////////////////////
+BYTE kInPortByte( WORD wPort );
+void kOutPortByte( WORD wPort, BYTE bData );
+WORD kInPortWord( WORD wPort );
+void kOutPortWord( WORD wPort, WORD wData );
+void kLoadGDTR( QWORD qwGDTRAddress );
+void kLoadTR( WORD wTSSSegmentOffset );
+void kLoadIDTR( QWORD qwIDTRAddress);
+void kEnableInterrupt( void );
+void kDisableInterrupt( void );
+QWORD kReadRFLAGS( void );
+QWORD kReadTSC( void );
+void kSwitchContext( CONTEXT* pstCurrentContext, CONTEXT* pstNextContext );
+void kHlt( void );
+BOOL kTestAndSet( volatile BYTE* pbDestination, BYTE bCompare, BYTE bSource );
+void kInitializeFPU( void );
+void kSaveFPUContext( void* pvFPUContext );
+void kLoadFPUContext( void* pvFPUContext );
+void kSetTS( void );
+void kClearTS( void );
 
-#endif /* __ASSENBLYUTILITY_H__ */
+#endif /*__ASSEMBLYUTILITY_H__*/
